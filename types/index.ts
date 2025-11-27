@@ -3,8 +3,8 @@ export interface IUser {
     email: string; // 邮箱
     name: string; // 姓名
     password_hash: string; // 密码哈希
-    created_at: string; //TODO
-    updated_at: string; //TODO
+    created_at?: string; //TODO
+    updated_at?: string; //TODO
 }
 
 export interface AuthRequest extends Request {

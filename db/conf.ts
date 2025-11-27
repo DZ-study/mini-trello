@@ -1,31 +1,46 @@
-import { Pool, PoolConfig } from 'pg'
+import { Sequelize } from 'sequelize';
+import dotenv from 'dotenv';
 
-// 数据库配置
-const dbConfig: PoolConfig = {
+dotenv.config();
+
+const sequelize = new Sequelize({
+    database: process.env.DB_NAME || 'mini_trello',
+    username: process.env.DB_USER || 'postgres',
+    password: process.env.DB_PASSWORD || '1qaz2wsx',
     host: process.env.DB_HOST || 'localhost',
     port: Number(process.env.DB_PORT) || 5432,
-    user: process.env.DB_USER || 'postgres',
-    password: process.env.DB_PASSWORD || '1qaz2wsx',
-    // TODO: 数据库名需要修改
-    database: process.env.DB_NAME || 'mini_trello',
+    dialect: 'postgres',
+     // 连接池配置
+    pool: {
+        max: 5,
+        min: 0,
+        acquire: 30000,
+        idle: 10000,
+    },
+    
+    // 日志配置
+    logging: process.env.NODE_ENV === 'development' 
+        ? (sql, timing) => console.log(`[SQL] ${sql} | ${timing}ms`)
+        : false,
+    
+    // 定义配置
+    define: {
+        underscored: true,      // 使用 snake_case 字段名
+        timestamps: true,       // 自动管理 createdAt 和 updatedAt
+        paranoid: false,        // 不启用软删除
+        freezeTableName: true,  // 不使用复数表名
+    },
+    // 时区配置
+    timezone: '+08:00', 
+});
 
-    // 连接池配置
-    max: Number(process.env.DB_MAX_CONNECTIONS) || 10,
-    idleTimeoutMillis: 30000, // 连接空闲超时时间
-    connectionTimeoutMillis: 2000, // 连接超时时间
-    maxUses: 7500, // 单个连接最大使用次数（预防内存泄漏）
-}
+export default sequelize;
 
-export const pool = new Pool(dbConfig);
-
-export const testConnection = async (): Promise<boolean> => {
+export const testConnection = async() => {
     try {
-        const client = await pool.connect();
+        await sequelize.authenticate();
         console.log('数据库连接成功');
-        client.release();
-        return true;
     } catch (error) {
         console.error('数据库连接测试失败:', error);
-        return false;
     }
 }

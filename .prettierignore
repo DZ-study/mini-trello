@@ -1,0 +1,11 @@
+node_modules/
+dist/
+build/
+coverage/
+*.md
+*.json
+*.sql
+*.log
+.env
+.env.*
+!.eslintrc.js
